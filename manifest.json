@@ -1,0 +1,37 @@
+{
+  "name": "ProTrack OS v1.0",
+  "short_name": "ProTrack",
+  "id": "/",
+  "description": "Mobile academy intelligence and ProTrack AI Analyst.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#0A4FFF",
+  "lang": "en",
+  "dir": "auto",
+  "categories": ["sports", "productivity", "education"],
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Analysis",
+      "short_name": "Analysis",
+      "url": "/?view=analysis",
+      "icons": [{"src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml"}]
+    },
+    {
+      "name": "Players",
+      "short_name": "Players",
+      "url": "/?view=players",
+      "icons": [{"src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml"}]
+    }
+  ]
+}

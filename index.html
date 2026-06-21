@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#0A4FFF" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ProTrack OS" />
+  <meta name="description" content="ProTrack OS — mobile academy intelligence and AI performance analysis." />
+  <link rel="manifest" href="manifest.json?v=1.0.6" />
+  <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/protrack-official.png" />
+  <title>ProTrack OS</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="os.css?v=1.0.4" />
+</head>
+<body>
+  <div id="splash" class="os-splash" aria-hidden="true">
+    <div class="splash-logo"><img src="assets/protrack-official.png" alt=""></div>
+    <strong>PROTRACK OS</strong><span>Your Game. Elevated.</span>
+  </div>
+
+  <div class="os-shell">
+    <aside class="sidebar" hidden></aside>
+    <header class="os-header">
+      <button class="os-brand" data-os-view="home" aria-label="ProTrack OS home">
+        <span class="os-logo-crop"><img src="assets/protrack-official.png" alt="ProTrack Private Coaching"></span>
+      </button>
+      <div class="os-header-actions">
+        <button class="os-lang" data-os-action="language" aria-label="Switch language">FA</button>
+        <button class="os-role-chip" data-os-action="account"><span class="presence-dot"></span><span id="osRoleLabel">Head Coach</span></button>
+      </div>
+    </header>
+
+    <div class="os-hidden-legacy" aria-hidden="true">
+      <span id="eyebrow"></span><span id="pageTitle"></span>
+      <button id="mobileMenu"></button><button id="exportShortcut"></button>
+    </div>
+
+    <main id="view" class="os-main" tabindex="-1"></main>
+
+    <button class="os-fab" data-os-action="quick-note" aria-label="Quick session note"><span>＋</span></button>
+    <nav class="os-bottom-nav" aria-label="Main navigation">
+      <button class="os-nav active" data-os-view="home"><span class="os-nav-icon">⌂</span><small data-i18n="nav_home">Home</small></button>
+      <button class="os-nav" data-os-view="players"><span class="os-nav-icon">◎</span><small data-i18n="nav_players">Players</small></button>
+      <button class="os-nav os-nav-analysis" data-os-view="analysis"><span class="os-nav-icon">◇</span><small data-i18n="nav_analysis">Analysis</small></button>
+      <button class="os-nav" data-os-view="promotions"><span class="os-nav-icon">⇧</span><small data-i18n="nav_promotions">Promotions</small></button>
+      <button class="os-nav" data-os-view="settings"><span class="os-nav-icon">⚙</span><small data-i18n="nav_settings">Settings</small></button>
+    </nav>
+  </div>
+
+  <div id="osModal" class="os-modal" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+  <script src="os.js"></script>
+</body>
+</html>
