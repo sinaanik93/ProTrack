@@ -42,17 +42,14 @@ def password_hash(password: str, salt_hex: str) -> str:
     return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt_hex), 180_000).hex()
 
 
+def new_auth_user(username: str, password: str, name: str, role: str, coach_id=None, player_id=None) -> dict:
+    salt = secrets.token_hex(16)
+    return {"username": username.strip().lower(), "name": name.strip(), "role": role, "coachId": coach_id, "playerId": player_id, "salt": salt, "hash": password_hash(password, salt), "active": True}
+
+
 def default_auth_data() -> dict:
-    defaults = [
-        ("headcoach", "ProTrack2026!", "Head Coach", "head", None, None),
-        ("assistant", "Coach2026!", "Sara Ahmadi", "assistant", "c2", None),
-        ("player", "Player2026!", "Luca Marino", "player", None, "p1"),
-    ]
-    users = []
-    for username, password, name, role, coach_id, player_id in defaults:
-        salt = secrets.token_hex(16)
-        users.append({"username": username, "name": name, "role": role, "coachId": coach_id, "playerId": player_id, "salt": salt, "hash": password_hash(password, salt), "active": True})
-    return {"version": 1, "users": users}
+    """A clean installation must enter first-time setup; no invisible demo accounts."""
+    return {"version": 2, "setupComplete": False, "academy": {}, "users": []}
 
 
 def load_auth_data() -> dict:
@@ -61,7 +58,12 @@ def load_auth_data() -> dict:
         data = default_auth_data()
         AUTH_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
         return data
-    return json.loads(AUTH_FILE.read_text(encoding="utf-8"))
+    data = json.loads(AUTH_FILE.read_text(encoding="utf-8"))
+    if "setupComplete" not in data:
+        data["setupComplete"] = bool(data.get("users"))
+        data["version"] = 2
+        save_auth_data(data)
+    return data
 
 
 def save_auth_data(data: dict) -> None:
@@ -272,14 +274,47 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         path = urlparse(self.path).path
+        if path == "/api/setup/status":
+            auth = load_auth_data()
+            self.json_response(200, {"setupRequired": not auth.get("setupComplete", False), "academyName": auth.get("academy", {}).get("name", "")})
+            return
         if path == "/api/auth/session":
             user = session_user(self)
             self.json_response(200, {"authenticated": True, "user": public_user(user)}) if user else self.json_response(401, {"authenticated": False})
+            return
+        if path == "/api/users":
+            user = session_user(self)
+            if not user or user.get("role") != "head":
+                self.json_response(403, {"ok": False}); return
+            auth = load_auth_data()
+            self.json_response(200, {"ok": True, "users": [public_user(u) | {"active": u.get("active", True)} for u in auth.get("users", [])]})
             return
         super().do_GET()
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if path == "/api/setup/complete":
+            try:
+                auth = load_auth_data()
+                if auth.get("setupComplete"):
+                    self.json_response(409, {"ok": False, "message": "Academy setup is already complete"}); return
+                data = request_json(self, 500_000); academy = data.get("academy") or {}; head = data.get("head") or {}; assistant = data.get("assistant") or {}; player = data.get("player") or {}
+                required = [academy.get("name"), academy.get("address"), head.get("name"), head.get("username"), head.get("password"), player.get("name")]
+                if not all(str(x or "").strip() for x in required) or len(str(head.get("password", ""))) < 10:
+                    self.json_response(400, {"ok": False, "message": "Required setup fields are incomplete"}); return
+                users = [new_auth_user(str(head["username"]), str(head["password"]), str(head["name"]), "head")]
+                if str(assistant.get("name", "")).strip():
+                    if len(str(assistant.get("password", ""))) < 10: self.json_response(400, {"ok": False, "message": "Assistant password must contain at least 10 characters"}); return
+                    users.append(new_auth_user(str(assistant.get("username", "assistant")), str(assistant["password"]), str(assistant["name"]), "assistant", "c2"))
+                if str(player.get("username", "")).strip() and str(player.get("password", "")).strip():
+                    if len(str(player["password"])) < 10: self.json_response(400, {"ok": False, "message": "Player password must contain at least 10 characters"}); return
+                    users.append(new_auth_user(str(player["username"]), str(player["password"]), str(player["name"]), "player", None, "p1"))
+                if len({u["username"] for u in users}) != len(users): self.json_response(400, {"ok": False, "message": "Usernames must be unique"}); return
+                auth = {"version": 2, "setupComplete": True, "academy": {k: str(academy.get(k, ""))[:300] for k in ("name","about","phone","whatsapp","instagram","address")}, "users": users}
+                save_auth_data(auth)
+                self.json_response(201, {"ok": True}); return
+            except Exception:
+                self.json_response(400, {"ok": False, "message": "Invalid setup request"}); return
         if path == "/api/auth/login":
             try:
                 data = request_json(self); username = str(data.get("username", "")).strip().lower(); password = str(data.get("password", ""))
@@ -304,6 +339,29 @@ class Handler(SimpleHTTPRequestHandler):
                     self.json_response(400, {"ok": False, "message": "Password requirements not met"}); return
                 auth = load_auth_data(); stored = next(u for u in auth["users"] if u["username"] == user["username"]); salt = secrets.token_hex(16); stored["salt"] = salt; stored["hash"] = password_hash(new, salt); save_auth_data(auth)
                 self.json_response(200, {"ok": True}); return
+            except Exception:
+                self.json_response(400, {"ok": False}); return
+        if path == "/api/users/create":
+            admin = session_user(self)
+            if not admin or admin.get("role") != "head": self.json_response(403, {"ok": False}); return
+            try:
+                data = request_json(self); role = str(data.get("role", "")); username = str(data.get("username", "")).strip().lower(); password = str(data.get("password", "")); name = str(data.get("name", "")).strip()
+                if role not in ("head", "assistant", "player") or not username or not name or len(password) < 10:
+                    self.json_response(400, {"ok": False, "message": "Complete all fields; passwords require 10 characters"}); return
+                auth = load_auth_data()
+                if any(u["username"] == username for u in auth.get("users", [])):
+                    self.json_response(409, {"ok": False, "message": "Username already exists"}); return
+                auth["users"].append(new_auth_user(username, password, name, role, data.get("coachId"), data.get("playerId"))); save_auth_data(auth)
+                self.json_response(201, {"ok": True}); return
+            except Exception:
+                self.json_response(400, {"ok": False}); return
+        if path == "/api/users/toggle":
+            admin = session_user(self)
+            if not admin or admin.get("role") != "head": self.json_response(403, {"ok": False}); return
+            try:
+                data = request_json(self); username = str(data.get("username", "")).strip().lower(); auth = load_auth_data(); target = next((u for u in auth.get("users", []) if u["username"] == username), None)
+                if not target or target["username"] == admin["username"]: self.json_response(400, {"ok": False}); return
+                target["active"] = not target.get("active", True); save_auth_data(auth); self.json_response(200, {"ok": True, "active": target["active"]}); return
             except Exception:
                 self.json_response(400, {"ok": False}); return
         if path not in ("/api/export/pdf", "/api/export/docx"):

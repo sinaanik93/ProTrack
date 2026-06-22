@@ -264,4 +264,3 @@ if("serviceWorker" in navigator&&location.protocol.startsWith("http")) navigator
 
 setTimeout(()=>document.getElementById("splash")?.classList.add("hide"),650);
 osRender(OS.current);
-if(!OS.user.loggedIn)setTimeout(osOpenLogin,720);
