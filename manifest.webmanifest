@@ -1,8 +1,8 @@
 {
-  "name": "ProTrack OS v1.0",
+  "name": "ProTrack OS v2.0",
   "short_name": "ProTrack",
   "id": "/",
-  "description": "Mobile academy intelligence and ProTrack AI Analyst.",
+  "description": "Academy operations and ProTrack AI performance intelligence.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,4 +1,4 @@
-# ProTrack OS v1.0 MVP
+# ProTrack OS v2.0 MVP
 
 A bilingual, mobile-first, local-first PWA built around **PROTRACK AI ANALYST v2.0 FINAL MASTER CLEAN** and the ProTrack v7.1 Pro Production methodology.
 
@@ -7,12 +7,24 @@ A bilingual, mobile-first, local-first PWA built around **PROTRACK AI ANALYST v2
 1. Right-click `start.ps1` and choose **Run with PowerShell**.
 2. Open [http://127.0.0.1:4173](http://127.0.0.1:4173).
 
-The app starts with a clearly marked two-session demonstration profile. New reports are saved privately in the browser's local storage.
+The app uses protected, role-based academy accounts. Operational records and reports remain local to this MVP installation.
+
+## Initial accounts
+
+- Head Coach: `headcoach` / `ProTrack2026!`
+- Assistant Coach: `assistant` / `Coach2026!`
+- Player: `player` / `Player2026!`
+
+Change each password from **Settings → Account & security** after first sign-in.
 
 ## What works
 
 - Player profiles, session history, video intake metadata, and manual match statistics
-- Head Coach, Assistant Coach, and Player access views
+- Server-authenticated Head Coach, Assistant Coach, and Player access with protected sessions
+- Academy profile, certifications, coach profiles and assigned-player scoping
+- Registration pipeline, assessment bookings, programs and player archiving
+- Complete player passport, competitions, rankings, achievements and journey timeline
+- Leaderboards and player transformation stories
 - Nightly academy dashboard, alerts, action center, attendance, packages, and promotion queue
 - Persian RTL and English LTR with instant switching
 - Installable PWA shell with offline support and bottom navigation
@@ -20,7 +32,7 @@ The app starts with a clearly marked two-session demonstration profile. New repo
 - Evidence-supported scoring with explicit `Insufficient Data` handling
 - Locked PDI formula and normalized PTI formula
 - Promotion thresholds, core rubric minimums, evidence confidence, and history checks
-- All 17 report sections in the required order and the exact dashboard database schema
+- All 17 report sections in the required order and the exact dashboard output schema
 - Real PDF and DOCX export through the included local server
 - Responsive premium black, blue, and silver interface
 - Official ProTrack Private Coaching logo across the app and exported reports

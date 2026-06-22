@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import io
+import hashlib
+import hmac
 import json
 import mimetypes
 import os
 import re
+import secrets
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import SimpleCookie
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -25,8 +30,64 @@ from reportlab.platypus import Flowable, PageBreak, Paragraph, SimpleDocTemplate
 
 ROOT = Path(__file__).resolve().parent
 LOGO = ROOT / "assets" / "protrack-official.png"
+DATA_DIR = ROOT / "data"
+AUTH_FILE = DATA_DIR / "auth.json"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("PROTRACK_PORT", "4173"))
+SESSION_TTL = 8 * 60 * 60
+SESSIONS: dict[str, dict] = {}
+
+
+def password_hash(password: str, salt_hex: str) -> str:
+    return hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), bytes.fromhex(salt_hex), 180_000).hex()
+
+
+def default_auth_data() -> dict:
+    defaults = [
+        ("headcoach", "ProTrack2026!", "Head Coach", "head", None, None),
+        ("assistant", "Coach2026!", "Sara Ahmadi", "assistant", "c2", None),
+        ("player", "Player2026!", "Luca Marino", "player", None, "p1"),
+    ]
+    users = []
+    for username, password, name, role, coach_id, player_id in defaults:
+        salt = secrets.token_hex(16)
+        users.append({"username": username, "name": name, "role": role, "coachId": coach_id, "playerId": player_id, "salt": salt, "hash": password_hash(password, salt), "active": True})
+    return {"version": 1, "users": users}
+
+
+def load_auth_data() -> dict:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    if not AUTH_FILE.exists():
+        data = default_auth_data()
+        AUTH_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return data
+    return json.loads(AUTH_FILE.read_text(encoding="utf-8"))
+
+
+def save_auth_data(data: dict) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    AUTH_FILE.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+
+def public_user(user: dict) -> dict:
+    return {k: user.get(k) for k in ("username", "name", "role", "coachId", "playerId")}
+
+
+def request_json(handler: SimpleHTTPRequestHandler, max_bytes: int = 100_000) -> dict:
+    length = min(int(handler.headers.get("Content-Length", "0")), max_bytes)
+    return json.loads(handler.rfile.read(length).decode("utf-8")) if length else {}
+
+
+def session_user(handler: SimpleHTTPRequestHandler) -> dict | None:
+    raw = handler.headers.get("Cookie", "")
+    cookie = SimpleCookie(); cookie.load(raw)
+    token = cookie.get("protrack_session")
+    if not token: return None
+    record = SESSIONS.get(token.value)
+    if not record or record["expires"] < time.time():
+        SESSIONS.pop(token.value, None); return None
+    auth = load_auth_data()
+    return next((u for u in auth["users"] if u["username"] == record["username"] and u.get("active", True)), None)
 
 
 def clean_payload(handler: SimpleHTTPRequestHandler) -> dict:
@@ -200,10 +261,56 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[ProTrack] {self.address_string()} {fmt % args}")
 
+    def json_response(self, status: int, data: dict, cookie: str | None = None):
+        payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        if cookie: self.send_header("Set-Cookie", cookie)
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers(); self.wfile.write(payload)
+
+    def do_GET(self):
+        path = urlparse(self.path).path
+        if path == "/api/auth/session":
+            user = session_user(self)
+            self.json_response(200, {"authenticated": True, "user": public_user(user)}) if user else self.json_response(401, {"authenticated": False})
+            return
+        super().do_GET()
+
     def do_POST(self):
         path = urlparse(self.path).path
+        if path == "/api/auth/login":
+            try:
+                data = request_json(self); username = str(data.get("username", "")).strip().lower(); password = str(data.get("password", ""))
+                auth = load_auth_data(); user = next((u for u in auth["users"] if u["username"] == username and u.get("active", True)), None)
+                if not user or not hmac.compare_digest(user["hash"], password_hash(password, user["salt"])):
+                    self.json_response(401, {"ok": False, "message": "Invalid credentials"}); return
+                token = secrets.token_urlsafe(32); SESSIONS[token] = {"username": username, "expires": time.time() + SESSION_TTL}
+                cookie = f"protrack_session={token}; HttpOnly; SameSite=Strict; Path=/; Max-Age={SESSION_TTL}"
+                self.json_response(200, {"ok": True, "user": public_user(user)}, cookie); return
+            except Exception:
+                self.json_response(400, {"ok": False, "message": "Invalid request"}); return
+        if path == "/api/auth/logout":
+            raw = self.headers.get("Cookie", ""); cookie = SimpleCookie(); cookie.load(raw); item = cookie.get("protrack_session")
+            if item: SESSIONS.pop(item.value, None)
+            self.json_response(200, {"ok": True}, "protrack_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0"); return
+        if path == "/api/auth/password":
+            user = session_user(self)
+            if not user: self.json_response(401, {"ok": False}); return
+            try:
+                data = request_json(self); old = str(data.get("oldPassword", "")); new = str(data.get("newPassword", ""))
+                if len(new) < 10 or not hmac.compare_digest(user["hash"], password_hash(old, user["salt"])):
+                    self.json_response(400, {"ok": False, "message": "Password requirements not met"}); return
+                auth = load_auth_data(); stored = next(u for u in auth["users"] if u["username"] == user["username"]); salt = secrets.token_hex(16); stored["salt"] = salt; stored["hash"] = password_hash(new, salt); save_auth_data(auth)
+                self.json_response(200, {"ok": True}); return
+            except Exception:
+                self.json_response(400, {"ok": False}); return
         if path not in ("/api/export/pdf", "/api/export/docx"):
             self.send_error(404)
+            return
+        if not session_user(self):
+            self.json_response(401, {"ok": False, "message": "Authentication required"})
             return
         try:
             data = clean_payload(self)
