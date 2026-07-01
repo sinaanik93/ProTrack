@@ -70,28 +70,7 @@ function osScore(value) { return Number.isFinite(Number(value)) ? Number(value).
 
 function osSeedData() {
   const saved=localStorage.getItem("protrack-os-data"); if(saved){ try { return JSON.parse(saved); } catch(_){} }
-  return {
-    players:[
-      {id:"p1",name:"Luca Marino",gender:"Male",age:24,phone:"+39 333 842 190",emergency:"Marco · +39 333 842 188",startDate:"2025-01-08",stage:"Development",track:"Development",status:"Active",pdi:6.3,pti:6.7,rubricMin:6,confidence:"HIGH",sessionsCompleted:12,attendance:{attended:31,missed:2,consecutive:0},coach:"Yekta · Head Coach",coachNotes:"Strong response to positioning work. Volley stability remains the main limiter.",membership:"Performance 40",sessionsPurchased:40,sessionsUsed:33,primaryFocus:"Volley",pdiHistory:[5.8,6.0,6.3],ptiHistory:[5.9,6.2,6.7],commitment:8,commitmentTrend:"stable"},
-      {id:"p2",name:"Maya Chen",gender:"Female",age:21,phone:"+98 912 430 7721",emergency:"Lina · +98 912 430 7722",startDate:"2025-07-18",stage:"Foundation",track:"Foundation",status:"Active",pdi:6.3,pti:6.1,rubricMin:5,confidence:"MEDIUM",sessionsCompleted:8,attendance:{attended:18,missed:1,consecutive:0},coach:"Yekta · Head Coach",coachNotes:"Repeated evidence supports a Development promotion review.",membership:"Academy 24",sessionsPurchased:24,sessionsUsed:19,primaryFocus:"Wall play",pdiHistory:[5.5,5.9,6.3],ptiHistory:[5.2,5.7,6.1],commitment:8,commitmentTrend:"up"},
-      {id:"p3",name:"Aryan Karimi",gender:"Male",age:27,phone:"+98 912 554 8301",emergency:"Nima · +98 912 554 8302",startDate:"2024-11-04",stage:"Development",track:"Development",status:"At Risk",pdi:6.2,pti:5.6,rubricMin:5,confidence:"MEDIUM",sessionsCompleted:16,attendance:{attended:21,missed:9,consecutive:2},coach:"Sara · Assistant Coach",coachNotes:"Attendance and current performance need review before the next block.",membership:"Performance 36",sessionsPurchased:36,sessionsUsed:30,primaryFocus:"Decision making",pdiHistory:[6.6,6.4,6.2],ptiHistory:[6.3,5.9,5.6],commitment:5,commitmentTrend:"down"},
-      {id:"p4",name:"Sara Nouri",gender:"Female",age:19,phone:"+98 912 208 1164",emergency:"Mina · +98 912 208 1165",startDate:"2026-01-22",stage:"Foundation",track:"Foundation",status:"Active",pdi:5.8,pti:5.6,rubricMin:4,confidence:"MEDIUM",sessionsCompleted:7,attendance:{attended:14,missed:4,consecutive:0},coach:"Sara · Assistant Coach",coachNotes:"Schedule an assessment after the next two training sessions.",membership:"Starter 20",sessionsPurchased:20,sessionsUsed:18,primaryFocus:"Positioning",pdiHistory:[5.6,5.7,5.8],ptiHistory:[5.5,5.5,5.6],commitment:7,commitmentTrend:"stable"},
-      {id:"p5",name:"Noora Haddad",gender:"Female",age:23,phone:"+971 50 482 1120",emergency:"Rami · +971 50 482 1121",startDate:"2026-02-12",stage:"Starter",track:"Starter",status:"Paused",pdi:4.7,pti:4.6,rubricMin:4,confidence:"MEDIUM",sessionsCompleted:5,attendance:{attended:10,missed:1,consecutive:0},coach:"Yekta · Head Coach",coachNotes:"Pause requested for travel. Foundation readiness evidence is complete.",membership:"Flex 16",sessionsPurchased:16,sessionsUsed:11,primaryFocus:"Groundstroke",pdiHistory:[4.1,4.4,4.7],ptiHistory:[4.0,4.3,4.6],commitment:8,commitmentTrend:"stable"}
-    ],
-    sessions:[
-      {id:"s1",playerId:"p1",date:osDateOffset(0),time:"08:00",type:"Training",coach:"Yekta",status:"Scheduled",notes:"Volley pressure block"},
-      {id:"s2",playerId:"p2",date:osDateOffset(0),time:"09:30",type:"Assessment",coach:"Yekta",status:"Scheduled",notes:"Development review"},
-      {id:"s3",playerId:"p3",date:osDateOffset(0),time:"11:00",type:"Training",coach:"Sara",status:"Scheduled",notes:"Decision reset"},
-      {id:"s4",playerId:"p4",date:osDateOffset(0),time:"15:30",type:"Training",coach:"Sara",status:"Scheduled",notes:"Positioning patterns"},
-      {id:"s5",playerId:"p1",date:osDateOffset(0),time:"17:00",type:"Match",coach:"Yekta",status:"Scheduled",notes:"Competitive evidence"},
-      {id:"s6",playerId:"p2",date:osDateOffset(0),time:"18:30",type:"Training",coach:"Yekta",status:"Scheduled",notes:"Wall play"},
-      {id:"s7",playerId:"p3",date:osDateOffset(1),time:"09:00",type:"Assessment",coach:"Yekta",status:"Scheduled",notes:"Performance review"},
-      {id:"s8",playerId:"p4",date:osDateOffset(1),time:"11:00",type:"Training",coach:"Sara",status:"Scheduled",notes:"Movement structure"},
-      {id:"s9",playerId:"p1",date:osDateOffset(1),time:"16:00",type:"Video Analysis",coach:"Yekta",status:"Scheduled",notes:"Match review"},
-      {id:"s10",playerId:"p2",date:osDateOffset(1),time:"18:00",type:"Training",coach:"Yekta",status:"Scheduled",notes:"Promotion block"}
-    ],
-    quickNotes:[]
-  };
+  return {players:[], sessions:[], quickNotes:[]};
 }
 OS.data=osSeedData();
 
@@ -166,7 +145,7 @@ function osRenderHome(root) {
       <section class="os-section os-card os-action-center"><div class="os-section-head"><div><h2>${osT("actions")}</h2><p>${osT("actions_sub")}</p></div></div><div class="os-action-list">${actions.map((a,i)=>`<button class="os-action" data-os-action="open-player" data-id="${a.player.id}"><span class="os-action-num">${i+1}</span><span><strong>${osEsc(a.label)}</strong><small>${osEsc(a.player.name)} · ${osEsc(a.player.primaryFocus)}</small></span><span class="os-chevron">›</span></button>`).join("")}</div></section>
     </div><div>
       <section class="os-section"><div class="os-section-head"><div><h2>${osT("today")}</h2><p>${today.length} ${osT("sessions_today")}</p></div></div><div class="os-session-list">${today.slice(0,6).map(s=>{const p=osPlayer(s.playerId);return `<article class="os-card os-session" data-os-action="open-player" data-id="${p.id}"><span class="os-time">${s.time}</span><div><h3>${osEsc(p.name)}</h3><p>${osEsc(s.type)} · ${osEsc(s.notes)}</p></div><span class="os-session-meta"><strong>${osEsc(s.coach)}</strong><small>${osEsc(p.track)}</small></span></article>`;}).join("")}</div></section>
-      <section class="os-section os-card os-insight"><div class="os-section-head"><div><h2>${osT("intelligence")}</h2><p>${osT("this_block")}</p></div></div><div class="os-insight-grid"><div class="os-insight-item"><small>${osT("common_weakness")}</small><strong>${osEsc(weakness)}</strong></div><div class="os-insight-item"><small>${osT("most_improved")}</small><strong>${osEsc(improved?.name||osT("insufficient"))}</strong></div><div class="os-insight-item"><small>${osT("pdi_trend")}</small><strong class="os-trend">+0.3 ↑</strong></div><div class="os-insight-item"><small>${osT("readiness_trend")}</small><strong>${ready}/${players.length}</strong></div></div></section>
+      <section class="os-section os-card os-insight"><div class="os-section-head"><div><h2>${osT("intelligence")}</h2><p>${osT("this_block")}</p></div></div><div class="os-insight-grid"><div class="os-insight-item"><small>${osT("common_weakness")}</small><strong>${osEsc(weakness)}</strong></div><div class="os-insight-item"><small>${osT("most_improved")}</small><strong>${osEsc(improved?.name||osT("insufficient"))}</strong></div><div class="os-insight-item"><small>${osT("pdi_trend")}</small><strong class="os-trend">${players.length?osT("insufficient"):"—"}</strong></div><div class="os-insight-item"><small>${osT("readiness_trend")}</small><strong>${ready}/${players.length}</strong></div></div></section>
     </div></div>`;
 }
 

@@ -8,16 +8,25 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ProTrack OS" />
-  <meta name="description" content="ProTrack OS — mobile academy intelligence and AI performance analysis." />
-  <link rel="manifest" href="manifest.json?v=2.1.3" />
+  <meta name="description" content="ProTrack OS — premium academy operations and sports performance intelligence." />
+  <link rel="manifest" href="manifest.json?v=1.3.4" />
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
   <link rel="apple-touch-startup-image" href="assets/apple-splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" />
-  <title>ProTrack OS v2.0</title>
+  <title>ProTrack OS</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="os.css?v=1.0.4" />
   <link rel="stylesheet" href="v2.css?v=2.0.3" />
   <link rel="stylesheet" href="production.css?v=2.1.6" />
+  <link rel="stylesheet" href="design-system.css?v=1.1.1" />
+  <link rel="stylesheet" href="core-screens.css?v=1.2.6" />
+  <link rel="stylesheet" href="quality.css?v=1.3.4" />
+  <link rel="stylesheet" href="ai-memory.css?v=2.3.0" />
+  <link rel="stylesheet" href="ai-coach.css?v=2.4.0" />
+  <link rel="stylesheet" href="ai-forecast.css?v=2.5.0" />
+  <link rel="stylesheet" href="ai-reporting.css?v=2.6.0" />
+  <link rel="stylesheet" href="ai-knowledge.css?v=2.7.0" />
+  <link rel="stylesheet" href="ai-automation.css?v=2.8.0" />
 </head>
 <body>
   <div id="splash" class="os-splash" aria-hidden="true">
@@ -44,13 +53,13 @@
 
     <main id="view" class="os-main" tabindex="-1"></main>
 
-    <button class="os-fab" data-os-action="quick-note" aria-label="Quick session note"><span>＋</span></button>
+    <button class="os-fab" data-os-action="quick-note" aria-label="Quick session note"><span>+</span></button>
     <nav class="os-bottom-nav" aria-label="Main navigation">
-      <button class="os-nav active" data-os-view="home"><span class="os-nav-icon">⌂</span><small data-i18n="nav_home">Home</small></button>
-      <button class="os-nav" data-os-view="players"><span class="os-nav-icon">◎</span><small data-i18n="nav_players">Players</small></button>
-      <button class="os-nav os-nav-analysis" data-os-view="analysis"><span class="os-nav-icon">◇</span><small data-i18n="nav_analysis">Analysis</small></button>
-      <button class="os-nav" data-os-view="promotions"><span class="os-nav-icon">⇧</span><small data-i18n="nav_promotions">Promotions</small></button>
-      <button class="os-nav" data-os-view="settings"><span class="os-nav-icon">⚙</span><small data-i18n="nav_settings">Settings</small></button>
+      <button class="os-nav active" data-os-view="home"><span class="os-nav-icon"></span><small data-i18n="nav_home">Today</small></button>
+      <button class="os-nav" data-os-view="players"><span class="os-nav-icon"></span><small data-i18n="nav_players">Players</small></button>
+      <button class="os-nav os-nav-analysis" data-os-view="analysis"><span class="os-nav-icon"></span><small data-i18n="nav_analysis">Analysis</small></button>
+      <button class="os-nav" data-os-view="sessions"><span class="os-nav-icon"></span><small>Sessions</small></button>
+      <button class="os-nav" data-os-view="academy"><span class="os-nav-icon"></span><small>Academy</small></button>
     </nav>
   </div>
 
@@ -59,7 +68,17 @@
 
   <script src="app.js"></script>
   <script src="os.js?v=2.1.2"></script>
-  <script src="v2.js?v=2.1.7"></script>
+  <script src="v2.js?v=2.1.8"></script>
   <script src="production.js?v=2.1.6"></script>
+  <script src="design-system.js?v=1.1.1"></script>
+  <script src="core-screens.js?v=1.2.6"></script>
+  <script src="quality.js?v=1.3.4"></script>
+  <script src="ai-video.js?v=2.2.0"></script>
+  <script src="ai-memory.js?v=2.3.0"></script>
+  <script src="ai-coach.js?v=2.4.0"></script>
+  <script src="ai-forecast.js?v=2.5.0"></script>
+  <script src="ai-reporting.js?v=2.6.0"></script>
+  <script src="ai-knowledge.js?v=2.7.0"></script>
+  <script src="ai-automation.js?v=2.8.0"></script>
 </body>
 </html>

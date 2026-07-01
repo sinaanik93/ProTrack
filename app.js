@@ -18,30 +18,7 @@ const STAGE_RULES = {
   Elite: { pdi: 9, pti: 9, rubric: 9 }
 };
 
-const demoAnalyses = [
-  {
-    id: "demo-luca-11", demo: true, playerName: "Luca Marino", sessionNumber: 11, analysisType: "Match Analysis", date: "2026-05-29T14:20:00Z",
-    background: "Right-handed development player; 18 months of padel experience.", coachNotes: "Attendance 92%. Responds well to feedback and has trained consistently across the last eight weeks.",
-    stats: "Unforced errors: 14\nForced errors: 9\nGood lobs: 11\nBad lobs: 7\nNet points won: 18\nDefensive recoveries: 13",
-    coverage: "full", footageContext: "match", videoName: "luca_session_11_match.mp4", videoSize: 124800000,
-    scores: {groundstroke:6,overhead:6,volley:5,footwork:6,coordinationTiming:6,focus:7,courtSpeed:6,recoverySpeed:6,explosiveness:6,balance:6,endurance:6,wallPlay:5,positioning:5,decisionMaking:5,technicalExecution:6,matchScore:5.8,videoScore:6,commitmentScore:8},
-    overallScore: 5.8, trackClassification: "Foundation",
-    evidence: {groundstroke:"Maintained neutral rallies; depth shortened under pressure.",overhead:"Bandeja contact was safe; recovery occasionally late.",volley:"Preparation was visible, but direction broke down on faster balls.",footwork:"First step was usable; recovery position inconsistent.",coordinationTiming:"Generally stable rhythm with late contact on glass rebounds.",focus:"Reset well after errors with two brief concentration drops.",courtSpeed:"Covered middle balls at a functional pace.",recoverySpeed:"Recovered after most neutral movements; slower after overheads.",explosiveness:"Acceleration was adequate in short forward movements.",balance:"Stable on routine shots; less stable when stretched wide.",endurance:"Movement quality remained similar through the available match.",wallPlay:"Used back glass in simple situations; avoided several playable rebounds.",positioning:"Understood zones but stayed deep after playable lobs.",decisionMaking:"Repeated early attacks from defensive positions.",technicalExecution:"Visible mechanics and control were functional but inconsistent under pressure.",matchScore:"Full match showed developing tactical stability and repeated net-transition errors.",videoScore:"Full-court footage supported the visible performance assessment.",commitmentScore:"Coach notes document 92% attendance and consistent training."},
-    priorities: [{area:"Positioning",impact:3,frequency:3,coachability:3,intervention:"Recover forward after effective lobs and hold partner spacing.",target:7},{area:"Volley",impact:3,frequency:2,coachability:3,intervention:"Short preparation and stable contact under redirected pace.",target:6},{area:"Wall play",impact:2,frequency:3,coachability:2,intervention:"Read and use back-glass rebounds before forcing a reset.",target:6}],
-    coachSummary: "Luca shows a dependable training attitude and a functional technical base. Match readiness is currently limited by recovery position and early attacking decisions. Prioritize forward recovery after effective lobs, then stabilize volley preparation under pace. Promotion should remain under review until these behaviours repeat across multiple matches."
-  },
-  {
-    id: "demo-luca-12", demo: true, playerName: "Luca Marino", sessionNumber: 12, analysisType: "Match Analysis", date: "2026-06-18T16:45:00Z",
-    background: "Right-handed development player; 18 months of padel experience.", coachNotes: "Attendance 94%. Strong response to recent positioning work. Two full matches reviewed across the current block.",
-    stats: "Unforced errors: 10\nForced errors: 11\nGood lobs: 15\nBad lobs: 4\nNet points won: 24\nDefensive recoveries: 17\nDecision-making errors: 6",
-    coverage: "full", footageContext: "match", videoName: "luca_session_12_match.mp4", videoSize: 168400000,
-    scores: {groundstroke:7,overhead:6,volley:6,footwork:7,coordinationTiming:7,focus:7,courtSpeed:7,recoverySpeed:7,explosiveness:6,balance:7,endurance:6,wallPlay:6,positioning:6,decisionMaking:6,technicalExecution:7,matchScore:6.5,videoScore:7,commitmentScore:8},
-    overallScore: 6.5, trackClassification: "Development",
-    evidence: {groundstroke:"Maintained rally depth and changed direction safely in repeated neutral exchanges.",overhead:"Controlled bandeja placement; recovery remained late on two deep contacts.",volley:"Stable contact on routine volleys; pace control weakened under body pressure.",footwork:"Consistent first step and visibly improved recovery after wide movement.",coordinationTiming:"Adapted contact timing across moderate pace and rebound variation.",focus:"Recovered after errors and maintained engagement through both reviewed sets.",courtSpeed:"Reached wide defensive balls with functional movement efficiency.",recoverySpeed:"Returned to base position more consistently after lobs and overheads.",explosiveness:"Forward acceleration was usable but did not consistently create pressure.",balance:"Maintained shot stability through most lateral movements.",endurance:"Available match showed stable output; longer-term endurance evidence remains limited.",wallPlay:"Used the back glass in simple defensive patterns with occasional rushed contact.",positioning:"Improved forward recovery and partner spacing; depth control still varied under pressure.",decisionMaking:"Selected safer resets more often; repeated two early attacks from defense.",technicalExecution:"Contact, control and recovery were stable across multiple visible patterns.",matchScore:"Full match evidence showed improved structure with repeat limitations at net.",videoScore:"Full-court footage clearly showed technical, tactical and movement behaviours.",commitmentScore:"Coach notes document 94% attendance and sustained response to feedback."},
-    priorities: [{area:"Volley",impact:3,frequency:3,coachability:3,intervention:"Stabilize preparation and direction control under body pressure.",target:7},{area:"Positioning",impact:3,frequency:2,coachability:3,intervention:"Hold optimal recovery depth after overheads and defensive resets.",target:7},{area:"Wall play",impact:2,frequency:2,coachability:3,intervention:"Build repeatable back-glass timing before adding pace.",target:7}],
-    coachSummary: "Luca now shows a development-level profile supported by improved recovery and safer point construction across repeated match evidence. Volley stability under pressure remains the main limiter. Keep the next block narrow: stabilize volley preparation, reinforce recovery depth after overheads, and continue simple back-glass patterns. Competition promotion is not yet supported because PDI, PTI and core rubric minimums remain below the locked thresholds."
-  }
-];
+const demoAnalyses = [];
 
 function blankDraft() {
   return { playerName:"", sessionNumber:1, analysisType:"Training Analysis", background:"", coachNotes:"", stats:"", coverage:"limited", footageContext:"training", videoName:"", videoSize:0, scores:{}, evidence:{}, overallScore:"", trackClassification:"", priorities:[{area:"",impact:3,frequency:3,coachability:3,intervention:"",target:7},{area:"",impact:2,frequency:2,coachability:3,intervention:"",target:7},{area:"",impact:2,frequency:2,coachability:2,intervention:"",target:7}], coachSummary:"" };
@@ -59,10 +36,14 @@ state.activeId = state.analyses.at(-1)?.id || null;
 function loadAnalyses() {
   try {
     const saved = JSON.parse(localStorage.getItem("protrack-v2-analyses"));
-    if (Array.isArray(saved) && saved.length) return saved;
+    if (Array.isArray(saved)) {
+      const real = saved.filter(item => !item?.demo);
+      localStorage.setItem("protrack-v2-analyses", JSON.stringify(real));
+      return real;
+    }
   } catch (_) {}
-  localStorage.setItem("protrack-v2-analyses", JSON.stringify(demoAnalyses));
-  return structuredClone(demoAnalyses);
+  localStorage.setItem("protrack-v2-analyses", JSON.stringify([]));
+  return [];
 }
 
 function saveAnalyses() {

@@ -11,6 +11,8 @@ import os
 import re
 import secrets
 import time
+from email import policy
+from email.parser import BytesParser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from http.cookies import SimpleCookie
 from pathlib import Path
@@ -27,6 +29,9 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import Flowable, PageBreak, Paragraph, SimpleDocTemplate, Spacer
 
+from backend.api import BackendAPI
+from backend.config import AppConfig
+
 
 ROOT = Path(__file__).resolve().parent
 LOGO = ROOT / "assets" / "protrack-official.png"
@@ -36,6 +41,8 @@ HOST = "127.0.0.1"
 PORT = int(os.environ.get("PROTRACK_PORT", "4173"))
 SESSION_TTL = 8 * 60 * 60
 SESSIONS: dict[str, dict] = {}
+CONFIG = AppConfig.from_env(ROOT)
+AI_BACKEND = BackendAPI(CONFIG)
 
 
 def password_hash(password: str, salt_hex: str) -> str:
@@ -80,6 +87,38 @@ def request_json(handler: SimpleHTTPRequestHandler, max_bytes: int = 100_000) ->
     return json.loads(handler.rfile.read(length).decode("utf-8")) if length else {}
 
 
+def request_backend_payload(handler: SimpleHTTPRequestHandler, max_bytes: int = 2_000_000) -> dict:
+    length = int(handler.headers.get("Content-Length", "0"))
+    if length > max_bytes:
+        raise ValueError("Request body is too large")
+    content_type = handler.headers.get("Content-Type", "")
+    if content_type.startswith("multipart/form-data"):
+        body = handler.rfile.read(length)
+        raw = f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode("utf-8") + body
+        message = BytesParser(policy=policy.default).parsebytes(raw)
+        payload: dict = {}
+        for part in message.iter_parts():
+            disposition = part.get("Content-Disposition", "")
+            name = part.get_param("name", header="content-disposition")
+            filename = part.get_filename()
+            if not name:
+                continue
+            data = part.get_payload(decode=True) or b""
+            if filename:
+                payload["fileName"] = filename
+                payload["contentType"] = part.get_content_type()
+                payload["size"] = len(data)
+                payload["_fileBytes"] = data
+            else:
+                charset = part.get_content_charset() or "utf-8"
+                payload[name] = data.decode(charset, errors="replace")
+        return payload
+    if content_type.startswith("application/json") or not content_type:
+        raw = handler.rfile.read(length)
+        return json.loads(raw.decode("utf-8")) if raw else {}
+    raise ValueError("Unsupported request body")
+
+
 def session_user(handler: SimpleHTTPRequestHandler) -> dict | None:
     raw = handler.headers.get("Cookie", "")
     cookie = SimpleCookie(); cookie.load(raw)
@@ -119,6 +158,24 @@ def is_heading(line: str) -> bool:
         "Assessment Dashboard", "Player Journey", "Progress Dashboard", "Results Generator",
         "Training Priority Matrix", "Development Plan", "Final Coach Report",
         "PROTRACK FINAL ASSESSMENT",
+        "Smart Highlights", "Report Metrics", "Coach Final Notes",
+        "One-Minute Coach Summary", "Top 3 Strengths", "Top 3 Priorities",
+        "Next Session Focus", "Player Overview", "Performance Summary",
+        "Technical Analysis", "Movement Analysis", "Positioning", "Wall Play",
+        "Volley", "Groundstrokes", "Mental Performance", "Consistency",
+        "Comparison with Previous Analysis", "PDI Breakdown", "PTI Breakdown",
+        "Promotion Readiness", "Coach Recommendations", "Training Plan",
+        "Development Timeline", "Current Stage and Journey", "Growth Since Joining",
+        "Progress Timeline", "Technical Improvements", "Remaining Weaknesses",
+        "Estimated Promotion", "Long-Term Goals", "Overall Assessment",
+        "Rubric Breakdown", "Skill Breakdown", "Athletic Performance",
+        "Coach Comments", "Match Context", "Strengths",
+        "Mistakes and Development Opportunities", "Decision Making Under Pressure",
+        "Match KPIs", "Preparation for Next Tournament", "Monthly Summary",
+        "PDI and PTI Change", "Most Improved Area", "Needs Attention",
+        "Coach Summary", "Coach Brief", "Next Session Action", "Academy Summary",
+        "Player Summary", "Promotion Candidates", "Players At Risk",
+        "Attendance Issues", "Performance Trends",
     }
     return line in known or bool(re.match(r"^\d{2}$", line))
 
@@ -194,6 +251,9 @@ def build_docx(data: dict) -> bytes:
             p.runs[0].font.name = "Consolas"
             p.runs[0].font.size = Pt(7.5)
             p.runs[0].font.color.rgb = RGBColor(35, 82, 130)
+        elif line.startswith("- "):
+            p = doc.add_paragraph(style="List Bullet")
+            p.add_run(line[2:])
         elif len(line) < 70 and (line.endswith(":") or " · " in line):
             p = doc.add_paragraph()
             r = p.add_run(line)
@@ -239,6 +299,8 @@ def build_pdf(data: dict) -> bytes:
             story.append(Paragraph(text, h_style))
         elif line.startswith("{") or line.startswith('"') or line in ("}", "},"):
             story.append(Paragraph(safe, code_style))
+        elif line.startswith("- "):
+            story.append(Paragraph(f"• {safe[2:]}", body_style))
         else:
             story.append(Paragraph(safe, body_style))
 
@@ -261,7 +323,10 @@ class Handler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=str(ROOT), **kwargs)
 
     def log_message(self, fmt, *args):
-        print(f"[ProTrack] {self.address_string()} {fmt % args}")
+        try:
+            print(f"[ProTrack] {self.address_string()} {fmt % args}", flush=False)
+        except Exception:
+            pass
 
     def json_response(self, status: int, data: dict, cookie: str | None = None):
         payload = json.dumps(data, ensure_ascii=False).encode("utf-8")
@@ -288,6 +353,10 @@ class Handler(SimpleHTTPRequestHandler):
                 self.json_response(403, {"ok": False}); return
             auth = load_auth_data()
             self.json_response(200, {"ok": True, "users": [public_user(u) | {"active": u.get("active", True)} for u in auth.get("users", [])]})
+            return
+        if AI_BACKEND.can_handle("GET", path):
+            status, payload = AI_BACKEND.handle_get(path, urlparse(self.path).query, session_user(self))
+            self.json_response(status, payload)
             return
         super().do_GET()
 
@@ -364,6 +433,38 @@ class Handler(SimpleHTTPRequestHandler):
                 target["active"] = not target.get("active", True); save_auth_data(auth); self.json_response(200, {"ok": True, "active": target["active"]}); return
             except Exception:
                 self.json_response(400, {"ok": False}); return
+        if path in ("/api/reports/export/pdf", "/api/reports/export/docx"):
+            user = session_user(self)
+            if not user:
+                self.json_response(401, {"ok": False, "message": "Authentication required"})
+                return
+            try:
+                data = request_json(self)
+                report_data = AI_BACKEND.export_report_payload(str(data.get("reportId", "")), user)
+                if path.endswith("pdf"):
+                    payload, mime, extension = build_pdf(report_data), "application/pdf", "pdf"
+                else:
+                    payload, mime, extension = build_docx(report_data), "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"
+                filename = re.sub(r"[^A-Za-z0-9_-]+", "_", f"ProTrack_{report_data['player']}_{report_data['title']}").strip("_")[:160]
+                self.send_response(200)
+                self.send_header("Content-Type", mime)
+                self.send_header("Content-Disposition", f'attachment; filename="{filename}.{extension}"')
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                self.wfile.write(payload)
+                return
+            except Exception as exc:
+                self.json_response(400, {"ok": False, "message": str(exc) or "Report export failed."})
+                return
+        if AI_BACKEND.can_handle("POST", path):
+            try:
+                data = request_backend_payload(self, AI_BACKEND.max_body_bytes(path))
+            except Exception:
+                self.json_response(400, {"ok": False, "message": "Invalid request body.", "code": "invalid_json"})
+                return
+            status, payload = AI_BACKEND.handle_post(path, data, session_user(self))
+            self.json_response(status, payload)
+            return
         if path not in ("/api/export/pdf", "/api/export/docx"):
             self.send_error(404)
             return
@@ -392,5 +493,8 @@ if __name__ == "__main__":
     mimetypes.add_type("application/manifest+json", ".webmanifest")
     mimetypes.add_type("application/manifest+json", ".json")
     mimetypes.add_type("image/svg+xml", ".svg")
-    print(f"ProTrack AI Analyst is running at http://{HOST}:{PORT}")
+    try:
+        print(f"ProTrack AI Analyst is running at http://{HOST}:{PORT}", flush=False)
+    except Exception:
+        pass
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()

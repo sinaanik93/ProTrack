@@ -1,0 +1,220 @@
+/* ProTrack OS Phase 2.8 - AI Automation Engine */
+.pta-screen {
+  display: grid;
+  gap: 18px;
+}
+
+.pta-hero {
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(0, 191, 255, .25);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(0, 191, 255, .18), transparent 36%),
+    radial-gradient(circle at 90% 10%, rgba(184, 205, 230, .12), transparent 34%),
+    linear-gradient(135deg, #050a13, #0a1424 58%, #08101d);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .36);
+}
+
+.pta-hero h1 {
+  max-width: 880px;
+  margin: 8px 0;
+  font-size: clamp(30px, 6vw, 58px);
+  letter-spacing: -.055em;
+}
+
+.pta-hero p {
+  max-width: 760px;
+  margin: 0;
+  color: rgba(226, 236, 249, .72);
+  line-height: 1.6;
+}
+
+.pta-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pta-flow span {
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(0, 128, 255, .12);
+  border: 1px solid rgba(0, 191, 255, .24);
+  color: #a7dcff;
+  font-size: 12px;
+}
+
+.pta-summary {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pta-metric,
+.pta-card,
+.pta-task,
+.pta-run,
+.pta-achievement {
+  border: 1px solid rgba(156, 185, 218, .16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .065), rgba(255, 255, 255, .025));
+  border-radius: 22px;
+  padding: 16px;
+}
+
+.pta-metric small,
+.pta-task small,
+.pta-run small,
+.pta-achievement small {
+  color: rgba(202, 216, 233, .64);
+}
+
+.pta-metric strong {
+  display: block;
+  margin-top: 7px;
+  font-size: 28px;
+  color: #fff;
+}
+
+.pta-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.pta-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pta-task {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.pta-task h3,
+.pta-run h3,
+.pta-achievement h3 {
+  margin: 4px 0 5px;
+  color: #fff;
+}
+
+.pta-task p,
+.pta-run p,
+.pta-achievement p {
+  margin: 0;
+  color: rgba(226, 236, 249, .74);
+  line-height: 1.45;
+}
+
+.pta-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.pta-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .10);
+  color: rgba(226, 236, 249, .80);
+  font-size: 12px;
+}
+
+.pta-pill.high,
+.pta-pill.Critical {
+  color: #ffd0d5;
+  background: rgba(255, 75, 95, .12);
+  border-color: rgba(255, 75, 95, .28);
+}
+
+.pta-pill.ok,
+.pta-pill.Completed,
+.pta-pill.Approved,
+.pta-pill.success {
+  color: #76f2bd;
+  background: rgba(49, 209, 138, .12);
+  border-color: rgba(49, 209, 138, .25);
+}
+
+.pta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.pta-actions button {
+  min-height: 34px;
+}
+
+.pta-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pta-morning {
+  border-color: rgba(0, 191, 255, .26);
+  background:
+    radial-gradient(circle at top right, rgba(0, 191, 255, .14), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .025));
+}
+
+.pta-morning-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pta-morning-grid div {
+  padding: 10px;
+  border-radius: 15px;
+  background: rgba(3, 11, 24, .50);
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.pta-morning-grid small {
+  color: rgba(202, 216, 233, .62);
+}
+
+.pta-morning-grid strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 20px;
+}
+
+.pta-empty {
+  color: rgba(202, 216, 233, .7);
+}
+
+@media (max-width: 1050px) {
+  .pta-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pta-layout,
+  .pta-grid-two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pta-summary,
+  .pta-morning-grid,
+  .pta-task {
+    grid-template-columns: 1fr;
+  }
+
+  .pta-actions {
+    justify-content: flex-start;
+  }
+}

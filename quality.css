@@ -1,0 +1,483 @@
+/* ProTrack OS Phase 1.3 — polish, performance and production quality.
+   Visual/interaction layer only. No scoring or AI engine rules are changed. */
+
+:root {
+  --ptq-ease: cubic-bezier(.22, 1, .36, 1);
+  --ptq-ease-press: cubic-bezier(.2, .8, .2, 1);
+  --ptq-fast: 150ms;
+  --ptq-med: 260ms;
+  --ptq-slow: 420ms;
+  --ptq-hit: 48px;
+  --ptq-card-min: 148px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: none;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% -12%, rgba(10,79,255,.16), transparent 38%),
+    linear-gradient(180deg, rgba(255,255,255,.018), transparent 18%);
+}
+
+button,
+[data-os-view],
+[data-os-action],
+[data-ptc-action],
+select,
+input,
+textarea {
+  min-height: var(--ptq-hit);
+}
+
+button,
+.os-primary-button,
+.os-secondary-button,
+.pt2-head-action,
+.ptc-choice,
+.ptc-attendance button,
+.ptq-recent-searches button {
+  transition:
+    transform var(--ptq-fast) var(--ptq-ease-press),
+    border-color var(--ptq-med) var(--ptq-ease),
+    background var(--ptq-med) var(--ptq-ease),
+    color var(--ptq-med) var(--ptq-ease),
+    box-shadow var(--ptq-med) var(--ptq-ease),
+    opacity var(--ptq-med) var(--ptq-ease);
+}
+
+button:active,
+.ptq-pressed {
+  transform: scale(.975);
+}
+
+button[disabled],
+.os-primary-button[disabled],
+.os-secondary-button[disabled] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.os-primary-button,
+.os-secondary-button,
+.pt2-head-action {
+  border-radius: 16px !important;
+  font-weight: 840 !important;
+  letter-spacing: -.01em;
+}
+
+.os-primary-button {
+  box-shadow: 0 12px 34px rgba(10,79,255,.28), inset 0 1px rgba(255,255,255,.18);
+}
+
+.os-primary-button:hover {
+  box-shadow: 0 16px 44px rgba(10,79,255,.34), inset 0 1px rgba(255,255,255,.2);
+}
+
+.os-card,
+.ptc-hero,
+.ptc-panel,
+.ptc-player-card,
+.ptc-analysis-card,
+.ptc-session-card,
+.ptc-academy-card,
+.ptc-choice,
+.ptc-login-shell {
+  border-color: rgba(213,229,248,.12) !important;
+  box-shadow: var(--ptd-shadow-soft);
+  transform: translateZ(0);
+  transition:
+    transform var(--ptq-med) var(--ptq-ease),
+    box-shadow var(--ptq-med) var(--ptq-ease),
+    border-color var(--ptq-med) var(--ptq-ease),
+    background var(--ptq-med) var(--ptq-ease),
+    opacity var(--ptq-med) var(--ptq-ease);
+}
+
+.ptc-player-card:hover,
+.ptc-analysis-card:hover,
+.ptc-session-card:hover,
+.ptc-academy-card:hover {
+  border-color: rgba(10,79,255,.28) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--ptd-shadow-premium);
+}
+
+.ptc-focus-card,
+.ptc-player-card,
+.ptc-analysis-card,
+.ptc-session-card,
+.ptc-academy-card {
+  min-height: var(--ptq-card-min);
+}
+
+.os-main > .ptc-screen,
+.os-main > .os-page-head,
+.os-main > .os-dashboard-grid,
+.os-main > section,
+.os-main > div {
+  animation: ptq-screen-in var(--ptq-slow) var(--ptq-ease) both;
+}
+
+@keyframes ptq-screen-in {
+  from { opacity: 0; transform: translateY(10px) scale(.995); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+
+.ptc-player-card.expanded .ptc-player-expanded,
+.os-modal.open .os-modal-card,
+.os-modal.open .ptc-login-shell,
+.os-modal.open .ptc-wizard {
+  animation: ptq-sheet-in var(--ptq-med) var(--ptq-ease) both;
+}
+
+@keyframes ptq-sheet-in {
+  from { opacity: 0; transform: translateY(18px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.toast {
+  border: 1px solid rgba(213,229,248,.14);
+  border-radius: 18px;
+  background: rgba(8,13,22,.9);
+  color: var(--ptd-text);
+  box-shadow: var(--ptd-shadow-premium);
+  backdrop-filter: blur(22px);
+}
+
+.toast.show {
+  animation: ptq-toast-in var(--ptq-med) var(--ptq-ease) both;
+}
+
+.toast.ptq-success {
+  border-color: rgba(34,201,154,.28);
+}
+
+.toast.ptq-error {
+  border-color: rgba(255,95,116,.32);
+}
+
+@keyframes ptq-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px) scale(.98); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+.ptq-search-wrap {
+  position: relative;
+  display: grid;
+  min-width: 0;
+}
+
+.ptq-search-wrap .os-search {
+  width: 100%;
+  padding-inline-end: 50px;
+}
+
+.ptq-search-wrap button {
+  position: absolute;
+  inset-block: 6px;
+  inset-inline-end: 6px;
+  width: 38px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255,255,255,.07);
+  color: var(--ptd-text-2);
+  font-size: 1.15rem;
+}
+
+.ptq-recent-searches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+  color: var(--ptd-text-3);
+  font-size: var(--ptd-caption);
+}
+
+.ptq-recent-searches span {
+  margin-inline-end: 2px;
+}
+
+.ptq-recent-searches button {
+  min-height: 40px;
+  border: 1px solid var(--ptd-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.035);
+  color: var(--ptd-text-2);
+  padding: 0 12px;
+  font-weight: 760;
+}
+
+.ptq-search-hit {
+  border-radius: 6px;
+  background: rgba(10,79,255,.24);
+  color: #fff;
+  padding-inline: 3px;
+}
+
+.ptd-skeleton,
+.ptq-skeleton-card,
+.ptq-skeleton-line,
+.ptq-skeleton-avatar {
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(90deg, rgba(255,255,255,.045), rgba(255,255,255,.09), rgba(255,255,255,.045));
+  background-size: 220% 100%;
+  animation: ptq-skeleton 1.35s var(--ptq-ease) infinite;
+}
+
+@keyframes ptq-skeleton {
+  0% { background-position: 180% 0; }
+  100% { background-position: -40% 0; }
+}
+
+.ptd-skeleton {
+  min-height: 180px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-xl);
+}
+
+.ptq-skeleton-grid {
+  display: grid;
+  gap: var(--ptd-4);
+}
+
+.ptq-skeleton-grid.players {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ptq-skeleton-card {
+  min-height: 156px;
+  border: 1px solid var(--ptd-border);
+  border-radius: var(--ptd-radius-lg);
+}
+
+.ptq-skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+}
+
+.ptq-skeleton-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+}
+
+.ptd-empty,
+.pt2-empty,
+.ptc-player-list .ptd-empty,
+.ptc-queue-section .ptd-empty {
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px solid rgba(10,79,255,.18) !important;
+  border-radius: var(--ptd-radius-xl) !important;
+  background:
+    radial-gradient(circle at 50% 0, rgba(10,79,255,.14), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)) !important;
+}
+
+.ptd-empty svg,
+.pt2-empty svg {
+  width: 44px;
+  height: 44px;
+  color: #65a9ff;
+}
+
+.ptd-empty h3,
+.pt2-empty h3 {
+  margin-bottom: 6px;
+  font-size: 1.05rem;
+}
+
+.ptd-empty p,
+.pt2-empty p {
+  max-width: 38ch;
+  color: var(--ptd-text-2);
+}
+
+.os-avatar,
+.ptc-profile-hero .os-avatar {
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.2), transparent 24%),
+    linear-gradient(145deg, rgba(10,79,255,.95), rgba(4,12,26,.95));
+  box-shadow: inset 0 1px rgba(255,255,255,.18), 0 12px 28px rgba(0,0,0,.24);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+img {
+  max-width: 100%;
+  image-rendering: auto;
+}
+
+.os-logo-crop img,
+.ptp-side-brand img,
+.ptc-login-brand img,
+.ptc-login-logo,
+.ptp-academy-logo img,
+.splash-logo img {
+  object-fit: contain !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.ptp-academy-logo {
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.ptq-offline-banner,
+.ptq-install-tip {
+  position: fixed;
+  inset-inline: max(14px, env(safe-area-inset-left)) max(14px, env(safe-area-inset-right));
+  bottom: calc(92px + env(safe-area-inset-bottom));
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(244,169,77,.26);
+  border-radius: 18px;
+  background: rgba(8,13,22,.92);
+  color: var(--ptd-text);
+  box-shadow: var(--ptd-shadow-premium);
+  backdrop-filter: blur(22px);
+  animation: ptq-sheet-in var(--ptq-med) var(--ptq-ease) both;
+}
+
+.ptq-offline-banner[data-state="online"] {
+  border-color: rgba(34,201,154,.24);
+}
+
+.ptq-offline-banner small,
+.ptq-install-tip small {
+  color: var(--ptd-text-2);
+}
+
+.ptq-offline-banner button,
+.ptq-install-tip button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+  color: var(--ptd-text);
+  padding: 0 12px;
+}
+
+.ptq-hidden {
+  display: none !important;
+}
+
+html[lang="fa"] .ptc-hero h1,
+html[lang="fa"] .os-page-head h1,
+html[lang="fa"] h1 {
+  letter-spacing: -.025em;
+  line-height: 1.12;
+}
+
+html[lang="fa"] .ptc-panel h2,
+html[lang="fa"] .ptc-academy-card h2,
+html[lang="fa"] .ptc-player-card h3 {
+  letter-spacing: -.015em;
+}
+
+html[lang="fa"] .ptc-chip,
+html[lang="fa"] .os-status,
+html[lang="fa"] .ptc-mini,
+html[lang="fa"] .ptc-task p,
+html[lang="fa"] .ptc-player-card p {
+  line-height: 1.7;
+}
+
+input,
+textarea,
+select {
+  transition:
+    border-color var(--ptq-med) var(--ptq-ease),
+    box-shadow var(--ptq-med) var(--ptq-ease),
+    background var(--ptq-med) var(--ptq-ease);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(10,79,255,.62) !important;
+  box-shadow: 0 0 0 4px rgba(10,79,255,.14) !important;
+}
+
+@media (max-width: 959px) {
+  .ptq-skeleton-grid.players {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --ptq-hit: 50px;
+  }
+
+  .ptc-hero,
+  .os-card,
+  .ptc-panel,
+  .ptc-player-card,
+  .ptc-analysis-card,
+  .ptc-session-card {
+    border-radius: 22px !important;
+  }
+
+  .ptq-skeleton-grid.players {
+    grid-template-columns: 1fr;
+  }
+
+  .ptq-offline-banner,
+  .ptq-install-tip {
+    bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 375px) {
+  .ptc-hero h1 {
+    font-size: 1.95rem;
+  }
+
+  .ptc-focus-card strong {
+    font-size: 1.7rem;
+  }
+
+  .os-bottom-nav {
+    padding-inline: 6px !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .os-main {
+    padding-top: 40px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}

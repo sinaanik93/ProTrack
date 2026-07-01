@@ -1,0 +1,192 @@
+.ptcoach-dashboard,
+.ptcoach-player {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(45, 168, 255, .16);
+  background: linear-gradient(145deg, rgba(5, 12, 23, .96), rgba(11, 28, 52, .86));
+}
+
+.ptcoach-board-grid,
+.ptcoach-dashboard-strip,
+.ptcoach-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.ptcoach-board-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ptcoach-dashboard-strip {
+  grid-template-columns: 1.2fr .8fr;
+}
+
+.ptcoach-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ptcoach-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ptcoach-board-grid section,
+.ptcoach-dashboard-strip section,
+.ptcoach-block {
+  border: 1px solid rgba(130, 178, 240, .13);
+  border-radius: 18px;
+  padding: 15px;
+  background: rgba(255, 255, 255, .035);
+}
+
+.ptcoach-board-grid h3,
+.ptcoach-dashboard-strip h3,
+.ptcoach-block h3,
+.ptcoach-reminders h3 {
+  margin: 0 0 12px;
+  color: #f1f7ff;
+}
+
+.ptcoach-board-grid article,
+.ptcoach-dashboard-strip article,
+.ptcoach-reminders article,
+.ptcoach-blocks article,
+.ptcoach-drills article,
+.ptcoach-metrics article {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  border-radius: 14px;
+  background: rgba(7, 18, 34, .72);
+  border: 1px solid rgba(83, 154, 255, .11);
+}
+
+.ptcoach-board-grid article + article,
+.ptcoach-dashboard-strip article + article,
+.ptcoach-reminders article + article {
+  margin-top: 8px;
+}
+
+.ptcoach-board-grid strong,
+.ptcoach-dashboard-strip strong,
+.ptcoach-block strong {
+  color: #f4f8ff;
+}
+
+.ptcoach-board-grid small,
+.ptcoach-dashboard-strip small,
+.ptcoach-block small,
+.ptcoach-block em {
+  color: #9fb5d1;
+  line-height: 1.45;
+}
+
+.ptcoach-empty,
+.ptcoach-block p,
+.ptcoach-reminders p {
+  color: #b5c7df;
+  line-height: 1.55;
+}
+
+.ptcoach-reminders {
+  border-radius: 18px;
+  padding: 15px;
+  background: rgba(14, 50, 95, .22);
+}
+
+.ptcoach-plan {
+  display: grid;
+  gap: 13px;
+}
+
+.ptcoach-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ptcoach-priorities {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.ptcoach-priorities li::marker {
+  color: #2da8ff;
+  font-weight: 800;
+}
+
+.ptcoach-checklist {
+  display: grid;
+  gap: 8px;
+}
+
+.ptcoach-checklist span {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(45, 168, 255, .08);
+  color: #d8e8fb;
+}
+
+.ptcoach-blocks,
+.ptcoach-drills,
+.ptcoach-metrics,
+.ptcoach-list {
+  display: grid;
+  gap: 10px;
+}
+
+.ptcoach-blocks {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.ptcoach-drills {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ptcoach-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ptcoach-motivation {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(42, 218, 168, .16);
+  background: rgba(42, 218, 168, .08);
+  color: #dffcf4 !important;
+}
+
+@media (max-width: 1100px) {
+  .ptcoach-board-grid,
+  .ptcoach-dashboard-strip,
+  .ptcoach-blocks,
+  .ptcoach-drills,
+  .ptcoach-metrics,
+  .ptcoach-grid.two,
+  .ptcoach-grid.three {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .ptcoach-board-grid,
+  .ptcoach-dashboard-strip,
+  .ptcoach-blocks,
+  .ptcoach-drills,
+  .ptcoach-metrics,
+  .ptcoach-grid.two,
+  .ptcoach-grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  .ptcoach-actions {
+    justify-content: stretch;
+  }
+
+  .ptcoach-actions button {
+    flex: 1 1 45%;
+  }
+}

@@ -32,20 +32,14 @@ function pt2Migrate() {
     {id:"c2",name:"Sara Ahmadi",title:"Assistant Coach",phone:"+98 912 000 0002",specialty:"Foundation & tactical development",certifications:["ProTrack Assistant Coach"],active:true}
   ];
   d.players.forEach((p,i)=>{p.coachId ||= p.coach?.toLowerCase().includes("sara") ? "c2" : "c1";p.nationality ||= i%2?"Iranian":"International";p.dominantHand ||= i%2?"Left":"Right";p.playingSide ||= i%3?"Right":"Left";p.goals ||= p.primaryFocus;});
-  d.registrations ||= [
-    {id:"r1",name:"Kian Rahimi",phone:"+98 912 755 2100",source:"Instagram",goal:"Competition preparation",status:"Assessment",created:osDateOffset(-3)},
-    {id:"r2",name:"Diana Khosravi",phone:"+98 912 412 6650",source:"Referral",goal:"Technical foundation",status:"New",created:osDateOffset(-1)}
-  ];
-  d.bookings ||= [{id:"b1",playerId:"p4",date:osDateOffset(2),time:"17:30",type:"Progress assessment",coachId:"c2",status:"Confirmed"}];
-  d.programs ||= [
-    {id:"pg1",name:"Competition Readiness 8",level:"Development",sessions:8,focus:"Decision making under pressure",playerIds:["p1","p3"],active:true},
-    {id:"pg2",name:"Foundation Control 6",level:"Foundation",sessions:6,focus:"Positioning and wall play",playerIds:["p2","p4"],active:true}
-  ];
-  d.tournaments ||= [{id:"t1",name:"Tehran Padel Open",date:osDateOffset(28),location:"Tehran",status:"Registered",playerIds:["p1","p3"]}];
-  d.rankings ||= [{id:"rk1",playerId:"p1",event:"Academy ladder",position:2,points:860,date:osDateOffset(-7)},{id:"rk2",playerId:"p3",event:"Academy ladder",position:4,points:740,date:osDateOffset(-7)}];
-  d.achievements ||= [{id:"a1",playerId:"p2",title:"Most Improved",detail:"Foundation block · +0.9 PTI",date:osDateOffset(-10)},{id:"a2",playerId:"p1",title:"12-session streak",detail:"Consistent training attendance",date:osDateOffset(-4)}];
+  d.registrations ||= [];
+  d.bookings ||= [];
+  d.programs ||= [];
+  d.tournaments ||= [];
+  d.rankings ||= [];
+  d.achievements ||= [];
   d.journey ||= d.players.flatMap(p=>[{id:pt2Id("j"),playerId:p.id,date:p.startDate,title:"Joined ProTrack",detail:`Started ${p.track} pathway`,type:"milestone"}]);
-  d.stories ||= [{id:"st1",playerId:"p2",title:"From hesitation to control",summary:"A focused development block improved confidence, wall play and match readiness.",published:true,date:osDateOffset(-5)}];
+  d.stories ||= [];
   d.archivedPlayers ||= [];
   pt2Save();
 }
@@ -260,6 +254,7 @@ document.addEventListener("click",event=>{
 },true);
 
 (async function pt2InitAuth(){
+  const localUser={...OS.user};
   try { const res=await fetch("/api/auth/session",{cache:"no-store"});if(!res.ok)throw new Error();const out=await res.json();OS.user={...out.user,loggedIn:true};osSave();PT2.authReady=true;osCloseModal();osRender(pt2Allowed(OS.current)?OS.current:"home"); }
-  catch(_){OS.user={loggedIn:false,name:"",role:"player",playerId:null};osSave();PT2.authReady=true;osOpenLogin();}
+  catch(_){if(localUser.loggedIn){OS.user=localUser;PT2.authReady=true;osRender(pt2Allowed(OS.current)?OS.current:"home");return;}OS.user={loggedIn:false,name:"",role:"player",playerId:null};osSave();PT2.authReady=true;osOpenLogin();}
 })();

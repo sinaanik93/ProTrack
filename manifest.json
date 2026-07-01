@@ -1,21 +1,38 @@
 {
-  "name": "ProTrack OS v2.0",
+  "name": "ProTrack OS",
   "short_name": "ProTrack",
-  "id": "/",
-  "description": "Academy operations and ProTrack AI performance intelligence.",
-  "start_url": "/?source=pwa",
+  "id": "/protrack-os",
+  "description": "Premium academy operations and sports performance intelligence for ProTrack coaches.",
+  "start_url": "/index.html?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#000000",
-  "theme_color": "#0A4FFF",
+  "theme_color": "#000000",
   "lang": "en",
   "dir": "auto",
   "categories": ["sports", "productivity", "education"],
+  "prefer_related_applications": false,
   "icons": [
-    {"src":"assets/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
-    {"src":"assets/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
-    {"src":"assets/icon-512-maskable.png","sizes":"512x512","type":"image/png","purpose":"maskable"},
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
     {
       "src": "assets/app-icon.svg",
       "sizes": "any",
@@ -25,16 +42,22 @@
   ],
   "shortcuts": [
     {
-      "name": "New Analysis",
-      "short_name": "Analysis",
-      "url": "/?view=analysis",
-      "icons": [{"src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml"}]
+      "name": "Today",
+      "short_name": "Today",
+      "url": "/index.html?view=home",
+      "icons": [{"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png"}]
     },
     {
       "name": "Players",
       "short_name": "Players",
-      "url": "/?view=players",
-      "icons": [{"src": "assets/app-icon.svg", "sizes": "any", "type": "image/svg+xml"}]
+      "url": "/index.html?view=players",
+      "icons": [{"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png"}]
+    },
+    {
+      "name": "Analysis",
+      "short_name": "Analysis",
+      "url": "/index.html?view=analysis",
+      "icons": [{"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png"}]
     }
   ]
 }
